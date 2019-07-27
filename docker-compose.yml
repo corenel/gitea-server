@@ -1,0 +1,20 @@
+version: "2"
+
+networks:
+  gitea:
+    external: false
+
+services:
+  server:
+    image: gitea/gitea:latest
+    environment:
+      - USER_UID=${USER_UID}
+      - USER_GID=${USER_GID}
+    restart: always
+    networks:
+      - gitea
+    volumes:
+      - ./data:/data
+    ports:
+      - "3000:3000"
+      - "222:22"
