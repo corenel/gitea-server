@@ -6,15 +6,34 @@ networks:
 
 services:
   server:
-    image: gitea/gitea:1.9
+    image: gitea/gitea:latest
     environment:
       - USER_UID=${USER_UID}
       - USER_GID=${USER_GID}
+      - DB_TYPE=postgres
+      - DB_HOST=db:5432
+      - DB_NAME=gitea
+      - DB_USER=gitea
+      - DB_PASSWD=gitea
     restart: always
     networks:
       - gitea
     volumes:
-      - ./data:/data
+      - ./gitea:/data
     ports:
       - "3000:3000"
       - "222:22"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:9.6
+    restart: always
+    environment:
+      - POSTGRES_USER=gitea
+      - POSTGRES_PASSWORD=gitea
+      - POSTGRES_DB=gitea
+    networks:
+      - gitea
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
