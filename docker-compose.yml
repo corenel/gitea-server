@@ -6,7 +6,7 @@ networks:
 
 services:
   server:
-    image: gitea/gitea:latest
+    image: gitea/gitea:1.11.3
     environment:
       - USER_UID=${USER_UID}
       - USER_GID=${USER_GID}
@@ -19,7 +19,9 @@ services:
     networks:
       - gitea
     volumes:
-      - ./gitea:/data
+      - ./data/gitea:/data
+      # - /etc/timezone:/etc/timezone:ro
+      # - /etc/localtime:/etc/localtime:ro
     ports:
       - "3000:3000"
       - "222:22"
@@ -36,4 +38,4 @@ services:
     networks:
       - gitea
     volumes:
-      - ./postgres:/var/lib/postgresql/data
+      - ./data/postgres:/var/lib/postgresql/data

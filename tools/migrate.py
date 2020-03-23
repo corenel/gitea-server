@@ -1,12 +1,11 @@
-#!/usr/bin/env python -B
+#!/usr/bin/env python
 
 from github import Github
 import requests
 import json
 import sys
-import os
 
-import setting
+from tools import setting
 
 if __name__ == '__main__':
     session = requests.Session()  # Gitea
@@ -27,11 +26,12 @@ if __name__ == '__main__':
     for repo in gh.get_user().get_repos():
         # Mirror to Gitea if I haven't forked this repository from elsewhere
         # if not repo.fork:
-        if True:
+        if repo.owner.login == setting.github_username :
             print(f'migrating {repo.full_name} ({repo.clone_url})')
             m = {
                 'repo_name':
-                    repo.full_name.replace('/', '-'),
+                    # repo.full_name.replace('/', '-'),
+                    repo.name,
                 'description':
                     repo.description or "not really known",
                 'clone_addr':
@@ -45,9 +45,9 @@ if __name__ == '__main__':
                     gitea_uid,
             }
 
-            # if repo.private:
-            #     m["auth_username"] = setting.github_username
-            #     m["auth_password"] = "{0}".format(setting.github_token)
+            if repo.private:
+                m["auth_username"] = setting.github_username
+                m["auth_password"] = "{0}".format(setting.github_token)
 
             jsonstring = json.dumps(m)
 
