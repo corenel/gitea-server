@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-from misc.migrator import Migrator
+from migrators.gitee_migrator import GiteeMigrator
 
 
 def main():
-    migrator = Migrator()
+    migrator = GiteeMigrator()
     migrator.migrate_repos()
 
 

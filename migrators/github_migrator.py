@@ -1,58 +1,21 @@
-from github import Github
-import requests
 import json
-import sys
+
+from github import Github
 
 from misc import setting
+from .base_migrator import BaseMigrator
 
 
-class Migrator:
+class GitHubMigrator(BaseMigrator):
     def __init__(self) -> None:
         super().__init__()
-
-        # set up gitea session
-        self.gitea = requests.Session()
-        self.gitea.headers.update({
-            'Content-type':
-            'application/json',
-            'Authorization':
-            f'token {setting.gitea_token}',
-        })
-
-        # get gitea uid
-        r = self.gitea.get(f'{setting.gitea_url}/user')
-        if r.status_code != 200:
-            print('Cannot get user details', file=sys.stderr)
-            exit(1)
-        self.gitea_uid = json.loads(r.text)['id']
-        self.gitea_username = json.loads(r.text)['login']
-
         # setup github client
         self.github = Github(setting.github_token)
 
-    def gitea_get(self, url):
-        r = self.gitea.get(url)
-        if r.status_code != 200:
-            print(f'Cannot get {url}', file=sys.stderr)
-            exit(1)
-        return r
-
-    def gitea_post(self, msg: dict, url: str):
-        data = json.dumps(msg)
-        r = self.gitea.post(url, data=data)
-        if r.status_code != 201:  # if not CREATED
-            if r.status_code == 409:  # item already exists
-                pass
-            print(r.status_code, r.text, data)
-
     def migrate_orgs(self):
         # get existed organizations on gitea
-        r = self.gitea_get(f'{setting.gitea_url}/admin/orgs')
-        gitea_orgs = [o['username'] for o in json.loads(r.text)]
-
-        # get gitea username
-        r = self.gitea_get(f'{setting.gitea_url}/user')
-        gitea_username = json.loads(r.text)['login']
+        r = self.gitea_get(url='/admin/orgs')
+        gitea_orgs = [o['username'] for o in r]
 
         # migrate organizations from github to gitea
         for org in self.github.get_user().get_orgs():
@@ -68,18 +31,18 @@ class Migrator:
                     "website": org.blog
                 }
                 self.gitea_post(
-                    msg,
-                    f'{setting.gitea_url}/admin/users/{gitea_username}/orgs',
+                    msg=msg,
+                    url=f'/admin/users/{self.gitea_username}/orgs',
                 )
 
     def migrate_repos(self):
         # get existed organizations on gitea
-        r = self.gitea_get(f'{setting.gitea_url}/admin/orgs')
-        gitea_orgs = {o['username']: o['id'] for o in json.loads(r.text)}
+        r = self.gitea_get(url='/admin/orgs')
+        gitea_orgs = {o['username']: o['id'] for o in r}
 
         # get gitea uid
-        r = self.gitea_get(f'{setting.gitea_url}/user')
-        gitea_uid = json.loads(r.text)['id']
+        r = self.gitea_get(url='/user')
+        gitea_uid = r['id']
 
         for repo in self.github.get_user().get_repos():
             # Mirror to Gitea if I haven't forked this repository from elsewhere
@@ -110,6 +73,6 @@ class Migrator:
                 msg["auth_password"] = "{0}".format(setting.github_token)
 
             self.gitea_post(
-                msg,
-                f'{setting.gitea_url}/repos/migrate',
+                msg=msg,
+                url=f'/repos/migrate',
             )
