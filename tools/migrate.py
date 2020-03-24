@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from tools.migrator import Migrator
+from misc.migrator import Migrator
 
 
 def main():

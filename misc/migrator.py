@@ -3,7 +3,7 @@ import requests
 import json
 import sys
 
-from tools import setting
+from misc import setting
 
 
 class Migrator:
