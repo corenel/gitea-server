@@ -1,11 +1,9 @@
+from functools import partial
+
 import requests
-import json
-import sys
 
 from misc import setting
 from .base_migrator import BaseMigrator
-
-from functools import partial
 
 
 class GiteeMigrator(BaseMigrator):

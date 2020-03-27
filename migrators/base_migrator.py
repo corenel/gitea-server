@@ -66,3 +66,7 @@ class BaseMigrator:
 
     def gitea_get_users(self):
         return self.gitea_get(url='/admin/users')
+
+    def gitea_get_repos(self):
+        # way too slow
+        return self.gitea_query(url='/user/repos')
