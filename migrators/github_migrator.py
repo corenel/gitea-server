@@ -37,7 +37,7 @@ class GitHubMigrator(BaseMigrator):
 
         # create user in gitea
         msg = {
-            "email": r.email,
+            "email": r.email if r.email is not None else '{}@exmaple.com'.format(r.login),
             "full_name": r.name,
             "login_name": r.login,
             "must_change_password": True,
